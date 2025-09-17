@@ -112,7 +112,7 @@ pip install -r requirements.txt
 
 1.  Open the main script (e.g., `main.py`) in a text editor.
 2.  Modify the `INPUT_TEXT` variable with the content you wish to synthesize.
-3.  (Optional) Adjust other configuration parameters at the top of the file, such as `VOICE_CHOICE`, `SPEED`, or `SILENCE_BETWEEN_PHRASES_MS`.
+3.  (Optional) Adjust other configuration parameters at the top of the file, such as `VOICE_CHOICE`, `SPEED`.
 4.  Run the script from your terminal (ensure the virtual environment is active):
 
 ```bash
