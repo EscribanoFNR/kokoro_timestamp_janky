@@ -1,0 +1,11 @@
+# requirements.txt
+# Core library for running the Kokoro ONNX model
+kokoro-onnx
+# Phonemizer library (espeak-ng wrapper) used by Kokoro
+misaki
+# For numerical operations and handling audio sample arrays
+numpy
+# For saving the audio arrays as .wav files
+scipy
+# The ONNX inference engine, a core dependency
+onnxruntime
