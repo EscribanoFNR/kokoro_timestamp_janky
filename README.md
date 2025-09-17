@@ -146,7 +146,7 @@ kokoro_timestamp_janky/
 
 Suggestions and improvements are **greatly appreciated**. If you have an idea to make this process less "janky" or more robust, please feel free to open an issue or submit a pull request.
 
-Please see the `CONTRIBUTING.md` file for details on our code of conduct, and the process for submitting pull requests to us. You can also open an [Issue](https://github.com/tu-usuario/kokoro_timestamp_janky/issues) to report a bug or suggest a new feature.
+Please see the `CONTRIBUTING.md` file for details on our code of conduct, and the process for submitting pull requests to us. You can also open an [Issue](https://github.com/EscribanoFNR/kokoro_timestamp_janky/issues) to report a bug or suggest a new feature.
 
 ## License
 
