@@ -142,6 +142,86 @@ kokoro_timestamp_janky/
 └── README.md               # This file
 ```
 
+## Hardware Acceleration with NVIDIA (CUDA)
+
+For users with a compatible NVIDIA GPU, the audio synthesis process can be significantly accelerated by offloading the computation from the CPU to the GPU. This is highly recommended when generating large volumes of audio, as it dramatically reduces processing time.
+
+This project leverages Microsoft's ONNX Runtime, which can use NVIDIA's CUDA platform to perform model inference. The following steps outline how to configure your environment to enable this feature.
+
+### Prerequisites
+
+*   An NVIDIA GPU with support for CUDA. Most modern NVIDIA GPUs (GTX 10-series / RTX 20-series and newer) are compatible.
+*   The latest NVIDIA Game Ready or Studio drivers for your GPU.
+
+### Configuration Steps
+
+#### 1. Install the GPU-Enabled Python Package
+
+The core Python dependency needs to be installed with the `[gpu]` extra, which ensures the correct version of ONNX Runtime is downloaded.
+
+If you have already installed the standard `requirements.txt`, first uninstall the CPU version and then install the GPU version:
+
+```bash
+# Ensure your virtual environment is active
+pip uninstall onnxruntime
+pip install kokoro-onnx[gpu]
+```
+
+This command automatically installs `onnxruntime-gpu` instead of the standard `onnxruntime`.
+
+#### 2. Install NVIDIA CUDA Toolkit and cuDNN
+
+`onnxruntime-gpu` is extremely specific about which versions of the CUDA Toolkit and cuDNN library it works with. You must install the versions that match your installed version of `onnxruntime-gpu`.
+
+1.  **Check your `onnxruntime-gpu` version:**
+    ```bash
+    pip show onnxruntime-gpu
+    ```
+    Note the version number (e.g., `1.22.0`).
+
+2.  **Find the Required CUDA/cuDNN Versions:**
+    Go to the official ONNX Runtime documentation to find the compatibility table. This is your single source of truth.
+    *   **URL:** [ONNX Runtime Execution Providers: CUDA - Requirements](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements)
+
+3.  **Install the CUDA Toolkit:**
+    *   Based on the table, download the correct version of the CUDA Toolkit. If you need a specific older version, you can find it in the official archive.
+    *   **URL:** [NVIDIA CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive)
+
+4.  **Install the cuDNN Library:**
+    *   cuDNN is a library that you must install manually.
+    *   **URL:** [NVIDIA cuDNN Archive](https://developer.nvidia.com/rdp/cudnn-archive) (Requires a free NVIDIA Developer account).
+    *   On the archive page, find and download the **ZIP file** for the cuDNN version that matches your CUDA Toolkit version (e.g., `Download cuDNN v9.x.x for CUDA 12.x`).
+    *   Unzip the downloaded file.
+    *   Copy the contents of the `bin`, `include`, and `lib` folders from the unzipped archive into the corresponding folders in your CUDA Toolkit installation directory (e.g., `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.x`).
+
+### Verification
+
+To confirm that the GPU is being used:
+
+1.  **Run the script:** Execute `python main.py` as usual. If there are any version mismatches, you will see errors in the console related to missing `.dll` files (like `cudnn64_9.dll`). If there are no errors, proceed to the next step.
+2.  **Monitor GPU Activity:**
+    *   **On Windows:** Open the Task Manager, go to the **Performance** tab, and click on your NVIDIA GPU. While the script is running, you should see a spike in activity on the **CUDA** graph.
+    *   **On Linux:** Run the command `watch -n 1 nvidia-smi` in a separate terminal. You should see Python appear as a process and GPU utilization increase while the script is generating audio.
+
+If you see GPU activity, your setup is correct and you are now benefiting from hardware acceleration.
+
+## Troubleshooting & FAQ
+
+**Q: I get an error about `cudnn64_X.dll` being missing or a `UserWarning` that CUDA is not available.**
+
+**A:** This is the most common issue and is almost always a version mismatch. Double-check these points:
+1.  Did you install `kokoro-onnx[gpu]`?
+2.  Go to the [ONNX Runtime requirements page](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements) and confirm that your installed versions of **`onnxruntime-gpu`**, **CUDA Toolkit**, and **cuDNN** are all compatible with each other.
+3.  Ensure you copied the cuDNN files (`.dll`, `.h`, `.lib`) into the correct CUDA Toolkit folders.
+
+**Q: Can I use an AMD or Intel GPU for acceleration?**
+
+**A:** Unfortunately, no. CUDA is a proprietary technology exclusive to NVIDIA GPUs. The `onnxruntime-gpu` package is compiled specifically against CUDA libraries and will not work with GPUs from other manufacturers.
+
+**Q: I see warnings like `Memcpy nodes are added` or `Some nodes were not assigned`. Is this an error?**
+
+**A:** No, these are normal informational warnings from ONNX Runtime. They indicate that the model is being processed correctly on the GPU. The `Memcpy` warning means data is being moved between your main RAM and the GPU's VRAM, and the `nodes not assigned` warning means ONNX is intelligently running a few minor operations on the CPU for efficiency. These do not affect the final audio output.
+
 ## Contributing
 
 Suggestions and improvements are **greatly appreciated**. If you have an idea to make this process less "janky" or more robust, please feel free to open an issue or submit a pull request.
